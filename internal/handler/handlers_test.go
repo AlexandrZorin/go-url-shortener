@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"maps"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -79,7 +80,9 @@ func TestPostHandler(t *testing.T) {
 			req := httptest.NewRequest(tt.method, "/", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", tt.contentType)
 			w := httptest.NewRecorder()
-			postHandler(w, req)
+			c, _ := gin.CreateTestContext(w)
+			c.Request = req
+			handlePostRequest(c)
 
 			assert.Equal(t, tt.want.status, w.Code)
 
@@ -93,14 +96,18 @@ func TestPostHandler(t *testing.T) {
 			req1 := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(testURLs["google"]))
 			req1.Header.Set("Content-Type", "text/plain")
 			w1 := httptest.NewRecorder()
-			postHandler(w1, req1)
+			c1, _ := gin.CreateTestContext(w1)
+			c1.Request = req1
+			handlePostRequest(c1)
 			firstShortURL := w1.Body.String()
 
 			//second request
 			req2 := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(testURLs["google"]))
 			req2.Header.Set("Content-Type", "text/plain")
 			w2 := httptest.NewRecorder()
-			postHandler(w2, req2)
+			c2, _ := gin.CreateTestContext(w2)
+			c2.Request = req2
+			handlePostRequest(c2)
 			secondShortURL := w2.Body.String()
 
 			assert.Equal(t, firstShortURL, secondShortURL)
@@ -121,8 +128,8 @@ func TestGetHandler(t *testing.T) {
 		"odkjrhjk": testURLs["vk"],
 	}
 
-	urlStorage.urls = make(map[string]string)
-	maps.Copy(urlStorage.urls, testData)
+	storage.urls = make(map[string]string)
+	maps.Copy(storage.urls, testData)
 
 	tests := []struct {
 		name     string
@@ -161,10 +168,12 @@ func TestGetHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(tt.method, "/"+tt.shortURL, nil)
 			w := httptest.NewRecorder()
-			getHandler(w, req)
+			c, _ := gin.CreateTestContext(w)
+			c.Request = req
+			c.Params = gin.Params{gin.Param{Key: "id", Value: tt.shortURL}}
+			handleGetRequest(c)
 
 			assert.Equal(t, tt.want.status, w.Code)
-
 			if tt.want.URL != "" {
 				assert.Equal(t, tt.want.URL, w.Header().Get("Location"))
 			}
