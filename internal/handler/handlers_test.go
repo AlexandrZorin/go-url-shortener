@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AlexandrZorin/go-url-shortener/internal/config"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -75,6 +76,7 @@ func TestPostHandler(t *testing.T) {
 		},
 	}
 
+	cfg := config.CreateConfig()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(tt.method, "/", strings.NewReader(tt.body))
@@ -82,7 +84,7 @@ func TestPostHandler(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 			c.Request = req
-			handlePostRequest(c)
+			handlePostRequest(c, cfg)
 
 			assert.Equal(t, tt.want.status, w.Code)
 
@@ -98,7 +100,7 @@ func TestPostHandler(t *testing.T) {
 			w1 := httptest.NewRecorder()
 			c1, _ := gin.CreateTestContext(w1)
 			c1.Request = req1
-			handlePostRequest(c1)
+			handlePostRequest(c1, cfg)
 			firstShortURL := w1.Body.String()
 
 			//second request
@@ -107,7 +109,7 @@ func TestPostHandler(t *testing.T) {
 			w2 := httptest.NewRecorder()
 			c2, _ := gin.CreateTestContext(w2)
 			c2.Request = req2
-			handlePostRequest(c2)
+			handlePostRequest(c2, cfg)
 			secondShortURL := w2.Body.String()
 
 			assert.Equal(t, firstShortURL, secondShortURL)

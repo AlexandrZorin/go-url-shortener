@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/AlexandrZorin/go-url-shortener/internal/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,12 +26,14 @@ func generateShortURL() string {
 	return string(b)
 }
 
-func SetupRoutes(r *gin.Engine) {
-	r.POST("/", handlePostRequest)
+func SetupRoutes(r *gin.Engine, cfg *config.Config) {
+	r.POST("/", func(c *gin.Context) {
+		handlePostRequest(c, cfg)
+	})
 	r.GET("/:id", handleGetRequest)
 }
 
-func handlePostRequest(c *gin.Context) {
+func handlePostRequest(c *gin.Context, cfg *config.Config) {
 	if c.Request.Method != http.MethodPost {
 		c.String(http.StatusBadRequest, "Этот URL принимает только POST запросы")
 		return
@@ -59,7 +62,7 @@ func handlePostRequest(c *gin.Context) {
 		shortKey = generateShortURL()
 		storage.urls[shortKey] = string(originalURL)
 	}
-	shortURL := fmt.Sprintf("http://localhost:8080/%s", shortKey)
+	shortURL := fmt.Sprintf("%s/%s", cfg.URL, shortKey)
 	c.Data(http.StatusCreated, "text/plain", []byte(shortURL))
 }
 
