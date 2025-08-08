@@ -19,6 +19,6 @@ func run() error {
 
 	r := gin.Default()
 	handler.SetupRoutes(r, cfg)
-	r.Run(":8080")
+	r.Run(cfg.ServerAddress)
 	return nil
 }
