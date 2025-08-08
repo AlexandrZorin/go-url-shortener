@@ -1,15 +1,24 @@
 package main
 
 import (
+	"log"
+
 	"github.com/AlexandrZorin/go-url-shortener/internal/config"
 	"github.com/AlexandrZorin/go-url-shortener/internal/handler"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	cfg := config.CreateConfig()
 
 	r := gin.Default()
 	handler.SetupRoutes(r, cfg)
 	r.Run(":8080")
+	return nil
 }
