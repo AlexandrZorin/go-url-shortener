@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"sync"
 
 	"github.com/AlexandrZorin/go-url-shortener/internal/config"
 	"github.com/gin-gonic/gin"
 )
 
 type URLStorage struct {
+	mu   sync.Mutex
 	urls map[string]string
 }
 
@@ -35,7 +37,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 
 func handlePostRequest(c *gin.Context, cfg *config.Config) {
 	if c.Request.Method != http.MethodPost {
-		c.String(http.StatusBadRequest, "Этот URL принимает только POST запросы")
+		c.String(http.StatusMethodNotAllowed, "Этот URL принимает только POST запросы")
 		return
 	}
 	if c.ContentType() != "text/plain" {
@@ -51,6 +53,8 @@ func handlePostRequest(c *gin.Context, cfg *config.Config) {
 		c.String(http.StatusBadRequest, "URL не может быть пустым")
 		return
 	}
+	storage.mu.Lock()
+	defer storage.mu.Unlock()
 	var shortKey string
 	for k, v := range storage.urls {
 		if v == string(originalURL) {
@@ -76,9 +80,11 @@ func handleGetRequest(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Неверный запрос")
 		return
 	}
+	storage.mu.Lock()
 	originalURL, exists := storage.urls[shortKey]
+	storage.mu.Unlock()
 	if !exists {
-		c.String(http.StatusBadRequest, "Сокращенный URL не найден")
+		c.String(http.StatusNotFound, "Сокращенный URL не найден")
 		return
 	}
 	c.Header("Location", originalURL)
