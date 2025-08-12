@@ -50,7 +50,7 @@ func TestPostHandler(t *testing.T) {
 			contentType: "text/plain",
 			method:      http.MethodGet,
 			want: want{
-				status:      http.StatusBadRequest,
+				status:      http.StatusMethodNotAllowed,
 				contentType: "text/plain",
 			},
 		},
@@ -153,7 +153,7 @@ func TestGetHandler(t *testing.T) {
 			method:   http.MethodPost,
 			shortURL: "riudjvhk",
 			want: want{
-				status: http.StatusBadRequest,
+				status: http.StatusMethodNotAllowed,
 			},
 		},
 		{
@@ -161,7 +161,7 @@ func TestGetHandler(t *testing.T) {
 			method:   http.MethodGet,
 			shortURL: "123qwer",
 			want: want{
-				status: http.StatusBadRequest,
+				status: http.StatusNotFound,
 			},
 		},
 	}

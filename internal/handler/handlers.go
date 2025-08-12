@@ -72,7 +72,7 @@ func handlePostRequest(c *gin.Context, cfg *config.Config) {
 
 func handleGetRequest(c *gin.Context) {
 	if c.Request.Method != http.MethodGet {
-		c.String(http.StatusBadRequest, "Этот URL принимает только GET запросы")
+		c.String(http.StatusMethodNotAllowed, "Этот URL принимает только GET запросы")
 		return
 	}
 	shortKey := c.Param("id")
