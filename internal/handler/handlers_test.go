@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"maps"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/AlexandrZorin/go-url-shortener/internal/config"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -130,8 +130,7 @@ func TestGetHandler(t *testing.T) {
 		"odkjrhjk": testURLs["vk"],
 	}
 
-	storage.urls = make(map[string]string)
-	maps.Copy(storage.urls, testData)
+	URLService.AddTestURLs(testData)
 
 	tests := []struct {
 		name     string
